@@ -1,16 +1,15 @@
 #broj studenata
-numOfStudents = 2000
+numOfStudents = 1000
+# numOfStudents = 5
 
 #broj ispita
-numOfCourses = 50 
+numOfCourses = 72
+# numOfCourses = 2
 
 #broj termina u kojima se mogu odvijati ispiti
-numOfTerms = 20
+numOfTerms = 42
+# numOfTerms = 2
 
 #broj kolegija po studentnu
-numOfCoursesPerStudent = 5
-
-#broj mogucih termina za svaki kolegij
-numOfTermsPerCourse = 5
-
-maxNumOfStudentsPerTerm = 200
+numOfCoursesPerStudent = 7
+# numOfCoursesPerStudent = 1
