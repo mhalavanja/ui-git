@@ -1,5 +1,7 @@
+from math import ceil
+
 #broj studenata
-numOfStudents = 1000
+numOfStudents = 800
 # numOfStudents = 5
 
 #broj ispita
@@ -10,6 +12,11 @@ numOfCourses = 72
 numOfTerms = 42
 # numOfTerms = 2
 
+#broj termina za pisanje ispita u jednom danu
+numOfTermsPerDay = 3
+
+#broj dana za pisanje ispita
+numOfDays = ceil(numOfTerms / numOfTermsPerDay)
+
 #broj kolegija po studentnu
-numOfCoursesPerStudent = 7
-# numOfCoursesPerStudent = 1
+numOfCoursesPerStudent = 5

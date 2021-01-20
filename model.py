@@ -1,5 +1,5 @@
 import numpy as np
-from settings import numOfCoursesPerStudent#, maxNumOfStudentsPerTerm
+from settings import numOfDays#, maxNumOfStudentsPerTerm
 
 class Course:
     def __init__(self, courseId: int) -> None:
@@ -31,6 +31,7 @@ class Student:
         self.terms = np.empty_like(self.courses)
         self.numOfCollisionsForStudent = -1
         self.numOfCourses = numOfCoursesForStudent
+        self.numOfSameDayTerms = -1
 
     def setCourses(self, courses):
         self.courses = courses
@@ -40,10 +41,17 @@ class Student:
         for i in range(self.numOfCourses):
             self.terms[i] = self.courses[i].term
         self.calculateNumOfCollisionsForStudent()
+        self.calculateNumOfSameDayTerms()
 
     def calculateNumOfCollisionsForStudent(self) -> None:
         collisions = self.numOfCourses - len(set(self.terms))
         self.numOfCollisionsForStudent = collisions
+    
+    def calculateNumOfSameDayTerms(self) -> None:
+        termsDays = set()
+        for t in self.terms:
+            termsDays.add(t.day)
+        self.numOfSameDayTerms = self.numOfCourses - len(termsDays)
 
 
 class Term:
@@ -51,6 +59,7 @@ class Term:
         self.termId = termId
         self.courses = []
         self.numOfStudentsInTerm = -1
+        self.day = termId // numOfDays
         # self.overCapacity = -1
 
     def setCourses(self, courses) -> None:

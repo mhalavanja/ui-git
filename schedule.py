@@ -1,7 +1,7 @@
 import numpy as np
 from model import Term, Course, Student
 from settings import numOfStudents, numOfCourses, numOfTerms, numOfCoursesPerStudent#, maxNumOfStudentsPerTerm
-from helper import getTotalNumOfCollisions, hillClimbing1, hillClimbing#, getTotalNumOfOverCapacity
+from helper import getTotalNumOfCollisions, getTotalNumOfSameDayTerms, hillClimbing#, getTotalNumOfOverCapacity
 rng = np.random.default_rng()
 
 terms = np.empty(numOfTerms, dtype=object)
@@ -44,15 +44,23 @@ for t in terms:
 for c in courses:
     c.calculateNumOfCollisionsForCourse()
 
-print(getTotalNumOfCollisions(courses)) #+ getTotalNumOfOverCapacity(terms))
+print(getTotalNumOfCollisions(courses), getTotalNumOfSameDayTerms(students)) #+ getTotalNumOfOverCapacity(terms))
 
 # finalNumOfCollisions, finalCourses = hillClimbing1(courses, terms)
 minCol = numOfCourses * numOfStudents
+minNum = minCol
 lastNumOfCollisions = 0
+lastNumOfSameDayTerms = 0
 curNumOfCollisions = 1
-while lastNumOfCollisions != curNumOfCollisions:
+curNumOfSameDayTerms = 1
+while lastNumOfCollisions != curNumOfCollisions or lastNumOfSameDayTerms != curNumOfSameDayTerms:
     lastNumOfCollisions = curNumOfCollisions
-    curNumOfCollisions, curCourses = hillClimbing(courses, terms)
-    print(curNumOfCollisions)
-    if curNumOfCollisions < minCol:
+    lastNumOfSameDayTerms = curNumOfSameDayTerms
+    curNumOfCollisions, curNumOfSameDayTerms, curCourses = hillClimbing(courses, terms, students)
+    print(curNumOfCollisions, curNumOfSameDayTerms)
+    if curNumOfCollisions < minCol or (
+        curNumOfCollisions <= minCol and
+        curNumOfSameDayTerms < minNum):
+
         minCol = curNumOfCollisions
+        minNum = curNumOfSameDayTerms
