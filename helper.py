@@ -1,4 +1,4 @@
-from settings import numOfCourses, numOfTerms
+from settings import numOfCourses, numOfTerms, numOfStudents
 
 def getTotalNumOfCollisions(courses) -> int:
     numOfCollisions = 0
@@ -19,26 +19,26 @@ def getTotalNumOfSameDayTerms(students) -> int:
 #     return num
 
 #Funkcija koja ce postaviti dani term za course i napraviti sve ostalo sta treba
-def setTermForCourse():
-    pass
+def setTermForCourse(newTerm, oldTerm, course) -> None:
+    oldTerm.courses.remove(course)
+    oldTerm.calculateNumOfStudentsInTerm()
+    newTerm.courses.append(course)
+    newTerm.calculateNumOfStudentsInTerm()
+    course.term = newTerm
+    for s in course.students:
+        s.setTerms()
+    course.calculateNumOfCollisionsForCourse()
 
-def hillClimbing(courses, terms, students):
+def hcCoreAlg(courses, terms, students) -> list:
     minNumOfCollisions = getTotalNumOfCollisions(courses)
     minNumOfSameDayTerms = getTotalNumOfSameDayTerms(students)
     i = 0
     while i < numOfCourses:
         newMin = False
         for j in range(numOfTerms):
-            curTerm = courses[i].term
-            if curTerm != terms[j]:
-                curTerm.courses.remove(courses[i])
-                curTerm.calculateNumOfStudentsInTerm()
-                terms[j].courses.append(courses[i])
-                terms[j].calculateNumOfStudentsInTerm()
-                courses[i].term = terms[j]
-                for s in courses[i].students:
-                    s.setTerms()
-                courses[i].calculateNumOfCollisionsForCourse()
+            oldTerm = courses[i].term
+            if oldTerm != terms[j]:
+                setTermForCourse(terms[j], oldTerm, courses[i])
             else:
                 continue
             curNumOfCollisions = getTotalNumOfCollisions(courses)
@@ -51,14 +51,26 @@ def hillClimbing(courses, terms, students):
                 minNumOfSameDayTerms = curNumOfSameDayTerms
                 newMin = True
             else:
-                curTerm.courses.append(courses[i])
-                curTerm.calculateNumOfStudentsInTerm()
-                terms[j].courses.remove(courses[i])
-                terms[j].calculateNumOfStudentsInTerm()
-                courses[i].term = curTerm
-                for s in courses[i].students:
-                    s.setTerms()
-                courses[i].calculateNumOfCollisionsForCourse()
+                setTermForCourse(oldTerm, terms[j], courses[i])
         if not newMin:
             i += 1
-    return (minNumOfCollisions, minNumOfSameDayTerms, courses)
+    return [minNumOfCollisions, minNumOfSameDayTerms, courses]
+
+def hillClimbing(courses, terms, students) -> list:
+    minCol = numOfCourses * numOfStudents
+    minNum = minCol
+    lastNumOfCollisions = 0
+    lastNumOfSameDayTerms = 0
+    curNumOfCollisions = 1
+    curNumOfSameDayTerms = 1
+    while lastNumOfCollisions != curNumOfCollisions or lastNumOfSameDayTerms != curNumOfSameDayTerms:
+        lastNumOfCollisions = curNumOfCollisions
+        lastNumOfSameDayTerms = curNumOfSameDayTerms
+        curNumOfCollisions, curNumOfSameDayTerms, curCourses = hcCoreAlg(courses, terms, students)
+        print(curNumOfCollisions, curNumOfSameDayTerms)
+        if curNumOfCollisions < minCol or (
+            curNumOfCollisions <= minCol and
+            curNumOfSameDayTerms < minNum):
+
+            minCol = curNumOfCollisions
+            minNum = curNumOfSameDayTerms

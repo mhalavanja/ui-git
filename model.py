@@ -1,5 +1,5 @@
 import numpy as np
-from settings import numOfDays#, maxNumOfStudentsPerTerm
+from settings import numOfTermsPerDay#, maxNumOfStudentsPerTerm
 
 class Course:
     def __init__(self, courseId: int) -> None:
@@ -59,7 +59,7 @@ class Term:
         self.termId = termId
         self.courses = []
         self.numOfStudentsInTerm = -1
-        self.day = termId // numOfDays
+        self.day = termId // numOfTermsPerDay
         # self.overCapacity = -1
 
     def setCourses(self, courses) -> None:

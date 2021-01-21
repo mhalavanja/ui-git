@@ -46,21 +46,4 @@ for c in courses:
 
 print(getTotalNumOfCollisions(courses), getTotalNumOfSameDayTerms(students)) #+ getTotalNumOfOverCapacity(terms))
 
-# finalNumOfCollisions, finalCourses = hillClimbing1(courses, terms)
-minCol = numOfCourses * numOfStudents
-minNum = minCol
-lastNumOfCollisions = 0
-lastNumOfSameDayTerms = 0
-curNumOfCollisions = 1
-curNumOfSameDayTerms = 1
-while lastNumOfCollisions != curNumOfCollisions or lastNumOfSameDayTerms != curNumOfSameDayTerms:
-    lastNumOfCollisions = curNumOfCollisions
-    lastNumOfSameDayTerms = curNumOfSameDayTerms
-    curNumOfCollisions, curNumOfSameDayTerms, curCourses = hillClimbing(courses, terms, students)
-    print(curNumOfCollisions, curNumOfSameDayTerms)
-    if curNumOfCollisions < minCol or (
-        curNumOfCollisions <= minCol and
-        curNumOfSameDayTerms < minNum):
-
-        minCol = curNumOfCollisions
-        minNum = curNumOfSameDayTerms
+hillClimbing(courses, terms, students)
