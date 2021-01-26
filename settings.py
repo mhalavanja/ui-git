@@ -1,7 +1,7 @@
 from math import ceil
 
 #broj studenata
-numOfStudents = 1000
+numOfStudents = 1600
 # numOfStudents = 5
 
 #broj ispita

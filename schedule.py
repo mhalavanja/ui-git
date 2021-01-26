@@ -1,8 +1,8 @@
 import numpy as np
 from model import Term, Course, Student
 from settings import numOfStudents, numOfCourses, numOfTerms, numOfCoursesPerStudent#, maxNumOfStudentsPerTerm
-from helper import getTotalNumOfCollisions, getTotalNumOfSameDayTerms, hillClimbing#, getTotalNumOfOverCapacity
-rng = np.random.default_rng()
+from helper import getTotalNumOfCollisions, getTotalNumOfSameDayTerms, hillClimbing, simulatedAnnealing
+rng = np.random.default_rng(1)
 
 terms = np.empty(numOfTerms, dtype=object)
 courses = np.empty(numOfCourses, dtype=object)
@@ -46,4 +46,13 @@ for c in courses:
 
 print(getTotalNumOfCollisions(courses), getTotalNumOfSameDayTerms(students)) #+ getTotalNumOfOverCapacity(terms))
 
-hillClimbing(courses, terms, students)
+# collisions, sameDayTerms = hillClimbing(courses, terms, students)
+
+# if collisions == 0:
+#     for s in students:
+#         termsId = []
+#         for t in s.terms:
+#             termsId.append(t.termId)
+#         print(termsId, len(s.terms) - len(set(termsId)))
+
+cc, tt, ss = simulatedAnnealing(20, 0, 0.001, courses, terms, students)

@@ -1,5 +1,5 @@
 import numpy as np
-from settings import numOfTermsPerDay#, maxNumOfStudentsPerTerm
+from settings import numOfTermsPerDay
 
 class Course:
     def __init__(self, courseId: int) -> None:
@@ -60,7 +60,6 @@ class Term:
         self.courses = []
         self.numOfStudentsInTerm = -1
         self.day = termId // numOfTermsPerDay
-        # self.overCapacity = -1
 
     def setCourses(self, courses) -> None:
         self.courses = list(courses)
@@ -71,9 +70,3 @@ class Term:
         for c in self.courses:
             num += c.numOfStudents
         self.numOfStudentsInTerm = num
-
-    # def calculateOverCapacity(self) -> None:
-    #     if self.numOfStudentsInTerm > maxNumOfStudentsPerTerm:
-    #         self.overCapacity = self.numOfStudentsInTerm - maxNumOfStudentsPerTerm
-    #     else:
-    #         self.overCapacity = 0

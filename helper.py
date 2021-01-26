@@ -1,3 +1,5 @@
+import numpy as np
+from math import exp
 from settings import numOfCourses, numOfTerms, numOfStudents
 
 def getTotalNumOfCollisions(courses) -> int:
@@ -11,12 +13,6 @@ def getTotalNumOfSameDayTerms(students) -> int:
     for s in students:
         numOfSameDayTerms += s.numOfSameDayTerms
     return numOfSameDayTerms
-
-# def getTotalNumOfOverCapacity(terms):
-#     num = 0
-#     for t in terms:
-#         num += t.overCapacity
-#     return num
 
 #Funkcija koja ce postaviti dani term za course i napraviti sve ostalo sta treba
 def setTermForCourse(newTerm, oldTerm, course) -> None:
@@ -54,11 +50,11 @@ def hcCoreAlg(courses, terms, students) -> list:
                 setTermForCourse(oldTerm, terms[j], courses[i])
         if not newMin:
             i += 1
-    return [minNumOfCollisions, minNumOfSameDayTerms, courses]
+    return [minNumOfCollisions, minNumOfSameDayTerms]
 
 def hillClimbing(courses, terms, students) -> list:
-    minCol = numOfCourses * numOfStudents
-    minNum = minCol
+    minNumOfCollisions = numOfCourses * numOfStudents
+    minNumOfSameDayTerms = minNumOfCollisions
     lastNumOfCollisions = 0
     lastNumOfSameDayTerms = 0
     curNumOfCollisions = 1
@@ -66,11 +62,68 @@ def hillClimbing(courses, terms, students) -> list:
     while lastNumOfCollisions != curNumOfCollisions or lastNumOfSameDayTerms != curNumOfSameDayTerms:
         lastNumOfCollisions = curNumOfCollisions
         lastNumOfSameDayTerms = curNumOfSameDayTerms
-        curNumOfCollisions, curNumOfSameDayTerms, curCourses = hcCoreAlg(courses, terms, students)
+        
+        curNumOfCollisions, curNumOfSameDayTerms = hcCoreAlg(courses, terms, students)
         print(curNumOfCollisions, curNumOfSameDayTerms)
-        if curNumOfCollisions < minCol or (
-            curNumOfCollisions <= minCol and
-            curNumOfSameDayTerms < minNum):
+        if curNumOfCollisions < minNumOfCollisions or (
+            curNumOfCollisions <= minNumOfCollisions and
+            curNumOfSameDayTerms < minNumOfSameDayTerms):
 
-            minCol = curNumOfCollisions
-            minNum = curNumOfSameDayTerms
+            minNumOfCollisions = curNumOfCollisions
+            minNumOfSameDayTerms = curNumOfSameDayTerms
+    
+    return curNumOfCollisions, curNumOfSameDayTerms
+
+def simulatedAnnealing(maxTemp: int, minTemp: int, step: int, courses, terms, students) -> list:
+    initialTemp = maxTemp
+    finalTemp = minTemp
+
+    curTemp = initialTemp
+    curNumOfCollisions = getTotalNumOfCollisions(courses)
+    curNumOfSameDayTerms = getTotalNumOfSameDayTerms(students)
+
+    bestNumOfCollisions = curNumOfCollisions
+    bestNumOfSameDayTerms = curNumOfSameDayTerms
+    bestSolution = [courses[:], terms[:], students[:]]
+
+    while curTemp > finalTemp:
+        [randCourseIndex] = np.random.randint(0, numOfCourses, 1)
+        [randTermIndex] = np.random.randint(0,numOfTerms, 1)
+
+        oldTerm = courses[randCourseIndex].term
+        if oldTerm != terms[randTermIndex]:
+            setTermForCourse(terms[randTermIndex], oldTerm, courses[randCourseIndex])
+        else:
+            continue
+
+        newNumOfCollisions = getTotalNumOfCollisions(courses)
+        newNumOfSameDayTerms = getTotalNumOfSameDayTerms(students)
+
+        collisionsDiff = curNumOfCollisions - newNumOfCollisions
+        sameDayTermsDiff = curNumOfSameDayTerms - newNumOfSameDayTerms
+
+        if collisionsDiff > 0 or (collisionsDiff == 0 and sameDayTermsDiff > 0):
+
+            if newNumOfCollisions < bestNumOfCollisions or (
+            newNumOfCollisions == bestNumOfCollisions and
+            newNumOfSameDayTerms < bestNumOfSameDayTerms):
+                bestNumOfCollisions = newNumOfCollisions
+                bestNumOfSameDayTerms = newNumOfSameDayTerms
+                bestSolution[0] = courses[:]
+                bestSolution[1] = terms[:]
+                bestSolution[2] = students[:]
+
+                print(bestNumOfCollisions, bestNumOfSameDayTerms)
+
+        else:
+            costDiff = collisionsDiff
+            if costDiff == 0:
+                costDiff = sameDayTermsDiff
+
+            if np.random.random_sample() > exp(costDiff / curTemp):
+                setTermForCourse(oldTerm, terms[randTermIndex], courses[randCourseIndex])
+
+        curTemp -= step
+    
+    return bestSolution
+
