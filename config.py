@@ -14,7 +14,7 @@ def setInputData():
     numOfTermsPerDay = 3
     minNumOfCoursesPerStudent = 1
     maxNumOfCoursesPerStudent = 5
-    seed = ""
+    seed = "1"
     mode = "HC"
     # numOfStudents = int(input("Unesite broj studenata: "))
     # numOfCourses = int(input("Unesite broj kolegija: "))

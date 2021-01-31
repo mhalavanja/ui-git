@@ -1,7 +1,6 @@
 import numpy as np
 from model import Term, Course, Student
 import config
-from helper import getTotalNumOfCollisions, getTotalNumOfSameDayTerms
 
 def initilize(terms, courses, students, rng):
     #Inicijalizacija termina
@@ -27,16 +26,11 @@ def initilize(terms, courses, students, rng):
         curCourses = np.empty(curNumOfCourses, dtype=object)
         for j in range(curNumOfCourses):
             #Svakog studenta dodajemo na kolegij koji je upisao
-            courses[courseIdListForStudent[j]].appendStudent(students[i])
+            courses[courseIdListForStudent[j]].students.append(students[i])
             curCourses[j] = courses[courseIdListForStudent[j]]
         #Studentu dodajemo sve kolegije koje je upisao 
         students[i].courses = curCourses
         students[i].setTerms()
 
-    for t in terms:
-        t.calculateNumOfStudentsInTerm()
-
     for c in courses:
-        c.calculateNumOfCollisionsForCourse()
-
-    print(getTotalNumOfCollisions(courses), getTotalNumOfSameDayTerms(students))
+        c.numOfStudents = len(c.students)

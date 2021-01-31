@@ -1,88 +1,76 @@
 from math import exp
 import config
 
-def getTotalNumOfCollisions(courses) -> int:
+def getTotalNums(students) -> int:
     numOfCollisions = 0
-    for c in courses:
-        numOfCollisions += c.numOfCollisionsForCourse
-    return numOfCollisions
-
-def getTotalNumOfSameDayTerms(students) -> int:
     numOfSameDayTerms = 0
     for s in students:
+        numOfCollisions += s.numOfCollisionsForStudent
         numOfSameDayTerms += s.numOfSameDayTerms
-    return numOfSameDayTerms
+    return (numOfCollisions, numOfSameDayTerms)
 
 #Funkcija koja ce postaviti dani term za course i napraviti sve ostalo sta treba
 def setTermForCourse(newTerm, oldTerm, course) -> None:
     oldTerm.courses.remove(course)
-    oldTerm.calculateNumOfStudentsInTerm()
     newTerm.courses.append(course)
-    newTerm.calculateNumOfStudentsInTerm()
     course.term = newTerm
     for s in course.students:
         s.setTerms()
-    course.calculateNumOfCollisionsForCourse()
 
-def hcCoreAlg(courses, terms, students) -> list:
-    minNumOfCollisions = getTotalNumOfCollisions(courses)
-    minNumOfSameDayTerms = getTotalNumOfSameDayTerms(students)
-    i = 0
-    while i < config.numOfCourses:
-        newMin = False
+def hcCoreAlg(courses, terms, students) -> tuple:
+    minNumOfCollisions, minNumOfSameDayTerms = getTotalNums(students)
+    for i in range(config.numOfCourses):
         for j in range(config.numOfTerms):
+            total = getTotalNums(students)
+            assert minNumOfCollisions == total[0]
+            assert minNumOfSameDayTerms == total[1]
             oldTerm = courses[i].term
-            if oldTerm != terms[j]:
+            if oldTerm.termId != terms[j].termId:
                 setTermForCourse(terms[j], oldTerm, courses[i])
             else:
                 continue
-            curNumOfCollisions = getTotalNumOfCollisions(courses)
-            curNumOfSameDayTerms = getTotalNumOfSameDayTerms(students)
+
+            curNumOfCollisions, curNumOfSameDayTerms = getTotalNums(students)
+
             if curNumOfCollisions < minNumOfCollisions or (
-                curNumOfCollisions <= minNumOfCollisions and 
+                curNumOfCollisions == minNumOfCollisions and 
                 curNumOfSameDayTerms < minNumOfSameDayTerms):
 
                 minNumOfCollisions = curNumOfCollisions
                 minNumOfSameDayTerms = curNumOfSameDayTerms
-                newMin = True
             else:
                 setTermForCourse(oldTerm, terms[j], courses[i])
-        if not newMin:
-            i += 1
-    return [minNumOfCollisions, minNumOfSameDayTerms]
+            pass
 
-def hillClimbing(courses, terms, students) -> list:
-    minNumOfCollisions = config.numOfCourses * config.numOfStudents
-    minNumOfSameDayTerms = minNumOfCollisions
-    lastNumOfCollisions = 0
-    lastNumOfSameDayTerms = 0
-    curNumOfCollisions = 1
-    curNumOfSameDayTerms = 1
+    return (minNumOfCollisions, minNumOfSameDayTerms)
+
+def hillClimbing(courses, terms, students) -> tuple:
+    curNumOfCollisions, curNumOfSameDayTerms = getTotalNums(students)
+    lastNumOfCollisions = curNumOfCollisions + 1
+    lastNumOfSameDayTerms = curNumOfSameDayTerms + 1
     bestSolution = {}
-    while lastNumOfCollisions != curNumOfCollisions or lastNumOfSameDayTerms != curNumOfSameDayTerms:
+    print(curNumOfCollisions, curNumOfSameDayTerms)
+
+    while curNumOfCollisions < lastNumOfCollisions or (
+        curNumOfCollisions == lastNumOfCollisions and
+        curNumOfSameDayTerms < lastNumOfSameDayTerms):
+
         lastNumOfCollisions = curNumOfCollisions
         lastNumOfSameDayTerms = curNumOfSameDayTerms
         
         curNumOfCollisions, curNumOfSameDayTerms = hcCoreAlg(courses, terms, students)
         print(curNumOfCollisions, curNumOfSameDayTerms)
-        if curNumOfCollisions < minNumOfCollisions or (
-            curNumOfCollisions <= minNumOfCollisions and
-            curNumOfSameDayTerms < minNumOfSameDayTerms):
-
-            minNumOfCollisions = curNumOfCollisions
-            minNumOfSameDayTerms = curNumOfSameDayTerms
     
     for c in courses:
         bestSolution[c.courseId] = c.term.termId
     return (bestSolution, curNumOfCollisions, curNumOfSameDayTerms)
 
-def simulatedAnnealing(maxTemp: int, minTemp: int, step: int, courses, terms, students, rng) -> list:
+def simulatedAnnealing(maxTemp: int, minTemp: int, step: int, courses, terms, students, rng) -> tuple:
     initialTemp = maxTemp
     finalTemp = minTemp
 
     curTemp = initialTemp
-    curNumOfCollisions = getTotalNumOfCollisions(courses)
-    curNumOfSameDayTerms = getTotalNumOfSameDayTerms(students)
+    curNumOfCollisions, curNumOfSameDayTerms = getTotalNums(courses)
 
     bestNumOfCollisions = curNumOfCollisions
     bestNumOfSameDayTerms = curNumOfSameDayTerms
@@ -98,8 +86,7 @@ def simulatedAnnealing(maxTemp: int, minTemp: int, step: int, courses, terms, st
         else:
             continue
 
-        newNumOfCollisions = getTotalNumOfCollisions(courses)
-        newNumOfSameDayTerms = getTotalNumOfSameDayTerms(students)
+        newNumOfCollisions, newNumOfSameDayTerms = getTotalNums(courses)
 
         collisionsDiff = curNumOfCollisions - newNumOfCollisions
         sameDayTermsDiff = curNumOfSameDayTerms - newNumOfSameDayTerms

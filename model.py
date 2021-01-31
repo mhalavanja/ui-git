@@ -8,17 +8,6 @@ class Course:
         self.students = []
         self.numOfStudents = 0
         self.numOfCollisionsForCourse = -1
-        
-    def appendStudent(self, student) -> None:
-        self.students.append(student)
-        self.numOfStudents += 1
-
-    def calculateNumOfCollisionsForCourse(self) -> None:
-        collisions = 0
-        for s in self.students:
-            if s.numOfCollisionsForStudent > 0:
-                collisions += 1
-        self.numOfCollisionsForCourse = collisions
 
 class Student:
     def __init__(self, studentId: int, numOfCoursesForStudent) -> None:
@@ -45,16 +34,8 @@ class Student:
             termsDays.add(t.day)
         self.numOfSameDayTerms = self.numOfCourses - len(termsDays)
 
-
 class Term:
     def __init__(self, termId) -> None:
         self.termId = termId
         self.courses = []
-        self.numOfStudentsInTerm = -1
         self.day = termId // config.numOfTermsPerDay
-
-    def calculateNumOfStudentsInTerm(self) -> None:
-        num = 0
-        for c in self.courses:
-            num += c.numOfStudents
-        self.numOfStudentsInTerm = num

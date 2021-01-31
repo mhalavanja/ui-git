@@ -34,9 +34,9 @@ elif config.mode == "SA":
 
 print("Broj kolizija: ", numOfCollisions)
 print("Broj ispita na isti dan: ", numOfSameDayTerms)
-print("Id kolegija   Id termina")
-for courseId in solution:
-    print(courseId,"            ", solution[courseId])
+# print("Id kolegija   Id termina")
+# for courseId in solution:
+#     print(courseId,"            ", solution[courseId])
 
 testNumOfCollisions = 0
 testNumOfSameDayTerms = 0
