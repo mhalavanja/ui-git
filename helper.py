@@ -1,6 +1,5 @@
-import numpy as np
 from math import exp
-from settings import numOfCourses, numOfTerms, numOfStudents
+import config
 
 def getTotalNumOfCollisions(courses) -> int:
     numOfCollisions = 0
@@ -29,9 +28,9 @@ def hcCoreAlg(courses, terms, students) -> list:
     minNumOfCollisions = getTotalNumOfCollisions(courses)
     minNumOfSameDayTerms = getTotalNumOfSameDayTerms(students)
     i = 0
-    while i < numOfCourses:
+    while i < config.numOfCourses:
         newMin = False
-        for j in range(numOfTerms):
+        for j in range(config.numOfTerms):
             oldTerm = courses[i].term
             if oldTerm != terms[j]:
                 setTermForCourse(terms[j], oldTerm, courses[i])
@@ -53,12 +52,13 @@ def hcCoreAlg(courses, terms, students) -> list:
     return [minNumOfCollisions, minNumOfSameDayTerms]
 
 def hillClimbing(courses, terms, students) -> list:
-    minNumOfCollisions = numOfCourses * numOfStudents
+    minNumOfCollisions = config.numOfCourses * config.numOfStudents
     minNumOfSameDayTerms = minNumOfCollisions
     lastNumOfCollisions = 0
     lastNumOfSameDayTerms = 0
     curNumOfCollisions = 1
     curNumOfSameDayTerms = 1
+    bestSolution = {}
     while lastNumOfCollisions != curNumOfCollisions or lastNumOfSameDayTerms != curNumOfSameDayTerms:
         lastNumOfCollisions = curNumOfCollisions
         lastNumOfSameDayTerms = curNumOfSameDayTerms
@@ -72,9 +72,11 @@ def hillClimbing(courses, terms, students) -> list:
             minNumOfCollisions = curNumOfCollisions
             minNumOfSameDayTerms = curNumOfSameDayTerms
     
-    return curNumOfCollisions, curNumOfSameDayTerms
+    for c in courses:
+        bestSolution[c.courseId] = c.term.termId
+    return (bestSolution, curNumOfCollisions, curNumOfSameDayTerms)
 
-def simulatedAnnealing(maxTemp: int, minTemp: int, step: int, courses, terms, students) -> list:
+def simulatedAnnealing(maxTemp: int, minTemp: int, step: int, courses, terms, students, rng) -> list:
     initialTemp = maxTemp
     finalTemp = minTemp
 
@@ -84,11 +86,11 @@ def simulatedAnnealing(maxTemp: int, minTemp: int, step: int, courses, terms, st
 
     bestNumOfCollisions = curNumOfCollisions
     bestNumOfSameDayTerms = curNumOfSameDayTerms
-    bestSolution = [courses[:], terms[:], students[:]]
+    bestSolution = {}
 
     while curTemp > finalTemp:
-        [randCourseIndex] = np.random.randint(0, numOfCourses, 1)
-        [randTermIndex] = np.random.randint(0,numOfTerms, 1)
+        [randCourseIndex] = rng.integers(config.numOfCourses, size=1)
+        [randTermIndex] = rng.integers(config.numOfTerms, size=1)
 
         oldTerm = courses[randCourseIndex].term
         if oldTerm != terms[randTermIndex]:
@@ -109,9 +111,8 @@ def simulatedAnnealing(maxTemp: int, minTemp: int, step: int, courses, terms, st
             newNumOfSameDayTerms < bestNumOfSameDayTerms):
                 bestNumOfCollisions = newNumOfCollisions
                 bestNumOfSameDayTerms = newNumOfSameDayTerms
-                bestSolution[0] = courses[:]
-                bestSolution[1] = terms[:]
-                bestSolution[2] = students[:]
+                for c in courses:
+                    bestSolution[c] = c.term.termId
 
                 print(bestNumOfCollisions, bestNumOfSameDayTerms)
 
@@ -120,10 +121,9 @@ def simulatedAnnealing(maxTemp: int, minTemp: int, step: int, courses, terms, st
             if costDiff == 0:
                 costDiff = sameDayTermsDiff
 
-            if np.random.random_sample() > exp(costDiff / curTemp):
+            if rng.uniform(0, 1, 1) > exp(costDiff / curTemp):
                 setTermForCourse(oldTerm, terms[randTermIndex], courses[randCourseIndex])
 
         curTemp -= step
     
-    return bestSolution
-
+    return (bestSolution, bestNumOfCollisions, bestNumOfSameDayTerms)

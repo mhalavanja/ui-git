@@ -1,21 +1,17 @@
 import numpy as np
-from settings import numOfTermsPerDay
+import config
 
 class Course:
     def __init__(self, courseId: int) -> None:
         self.courseId = courseId
-        self.students = []
         self.term = None
-        self.numOfCollisionsForCourse = -1
+        self.students = []
         self.numOfStudents = 0
+        self.numOfCollisionsForCourse = -1
         
     def appendStudent(self, student) -> None:
         self.students.append(student)
         self.numOfStudents += 1
-
-    def setTerm(self, term):
-        self.term = term    
-        self.calculateNumOfCollisionsForCourse()
 
     def calculateNumOfCollisionsForCourse(self) -> None:
         collisions = 0
@@ -29,13 +25,9 @@ class Student:
         self.studentId = studentId
         self.courses = np.empty(numOfCoursesForStudent, dtype=object)
         self.terms = np.empty_like(self.courses)
-        self.numOfCollisionsForStudent = -1
         self.numOfCourses = numOfCoursesForStudent
+        self.numOfCollisionsForStudent = -1
         self.numOfSameDayTerms = -1
-
-    def setCourses(self, courses):
-        self.courses = courses
-        self.setTerms()
 
     def setTerms(self) -> None:
         for i in range(self.numOfCourses):
@@ -59,11 +51,7 @@ class Term:
         self.termId = termId
         self.courses = []
         self.numOfStudentsInTerm = -1
-        self.day = termId // numOfTermsPerDay
-
-    def setCourses(self, courses) -> None:
-        self.courses = list(courses)
-        self.calculateNumOfStudentsInTerm()
+        self.day = termId // config.numOfTermsPerDay
 
     def calculateNumOfStudentsInTerm(self) -> None:
         num = 0
