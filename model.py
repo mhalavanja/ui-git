@@ -6,8 +6,6 @@ class Course:
         self.courseId = courseId
         self.term = None
         self.students = []
-        self.numOfStudents = 0
-        self.numOfCollisionsForCourse = -1
 
 class Student:
     def __init__(self, studentId: int, numOfCoursesForStudent) -> None:
@@ -37,5 +35,4 @@ class Student:
 class Term:
     def __init__(self, termId) -> None:
         self.termId = termId
-        self.courses = []
         self.day = termId // config.numOfTermsPerDay

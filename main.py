@@ -1,8 +1,20 @@
-from schedule import initilize
+#=============================================================================
+#   Assignment:  Project assignment -- Exame Schedule Problem
+#
+#       Author:  Matija Halavanja
+#     Language:  Python 3
+#       To Run:  python3 main.py
+#
+#        Class:  Artificial Intelligence
+#   Instructor:  Luka Grubišić
+#     Due Date:  25.2.2021.
+#
+#-----------------------------------------------------------------------------
 import numpy as np
+import time
 import config 
+from schedule import initilize
 from helper import hillClimbing, simulatedAnnealing
-from schedule import *
 
 config.setInputData()
 
@@ -17,6 +29,8 @@ courses = np.empty(config.numOfCourses, dtype=object)
 students = np.empty(config.numOfStudents, dtype=object)
 
 initilize(terms, courses, students, rng)
+
+#Dictionary which is used for validating
 studentsTestDict = {} 
 for s in students:
     coursesIdList = []
@@ -24,30 +38,45 @@ for s in students:
         coursesIdList.append(c.courseId)
     studentsTestDict[s.studentId] = coursesIdList
 
-solution = None
+#Final number of collisions and same day terms
 numOfCollisions = None
 numOfSameDayTerms = None
-if config.mode == "HC":
-    solution, numOfCollisions, numOfSameDayTerms = hillClimbing(courses, terms, students)
+
+startTime = time.time()
+if config.mode == "CHC" or config.mode == "FHC":
+    numOfCollisions, numOfSameDayTerms = hillClimbing(courses, terms, students)
 elif config.mode == "SA":
-    solution, numOfCollisions, numOfSameDayTerms = simulatedAnnealing(config.maxTemp, config.minTemp, config.step, courses, terms, students, rng)
+    courses, students, numOfCollisions, numOfSameDayTerms = simulatedAnnealing(config.maxTemp, config.minTemp, config.step, courses, terms, students, rng)
+elapsedTime = time.time() - startTime
 
 print("Broj kolizija: ", numOfCollisions)
 print("Broj ispita na isti dan: ", numOfSameDayTerms)
-# print("Id kolegija   Id termina")
-# for courseId in solution:
-#     print(courseId,"            ", solution[courseId])
+print("Vrijeme izvršavanja metode: ", elapsedTime, " sekundi")
 
+with open(config.out, "w") as f:    
+    for c in courses:
+        f.write("{0} {1}\n".format(c.courseId, c.term.termId))
+
+#Code for validating our solution. 
+coursesTestDict = {}
+for c in courses:
+    coursesTestDict[c.courseId] = (c.term.termId, c.term.day)
+
+#Variables which are used for validating
 testNumOfCollisions = 0
 testNumOfSameDayTerms = 0
 for s in students:
     coursesIdList = []
-    s.calculateNumOfCollisionsForStudent
-    s.calculateNumOfSameDayTerms
-    testNumOfCollisions += s.numOfCollisionsForStudent
-    testNumOfSameDayTerms += s.numOfSameDayTerms
+    termsIdList = []
+    termsDayList = []
     for c in s.courses:
         coursesIdList.append(c.courseId)
+        term = coursesTestDict[c.courseId]
+        termsIdList.append(term[0])
+        termsDayList.append(term[1])
+    testNumOfCollisions += len(s.courses) - len(set(termsIdList))
+    testNumOfSameDayTerms += len(s.courses) - len(set(termsDayList))
     assert studentsTestDict[s.studentId] == coursesIdList
+    
 assert testNumOfCollisions == numOfCollisions
 assert testNumOfSameDayTerms == numOfSameDayTerms
